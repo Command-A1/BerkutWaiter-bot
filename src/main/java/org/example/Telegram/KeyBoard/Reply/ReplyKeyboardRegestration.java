@@ -5,18 +5,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 
 public class ReplyKeyboardRegestration extends ReplyKeyBoardButton {
-    private static ReplyKeyboardRegestration replyKeyboardRegestration;
-
-    private ReplyKeyboardRegestration() {
-        initializeObjectInlineKeyboard();
-    }
-    public static synchronized ReplyKeyboardRegestration getReplyKeyboardRegestration(){
-        if(replyKeyboardRegestration == null){
-            replyKeyboardRegestration = new ReplyKeyboardRegestration();
-        }
-        return replyKeyboardRegestration;
-    }
-    public SendMessage buttonRegestration(Waiter waiter) {
+    public SendMessage buttonRegistration(Waiter waiter) {
         waiter.setTextInSendMessage("Давай знакомиться!");
         rowHorizontal.add(new KeyboardButton("Регистрация"));
 

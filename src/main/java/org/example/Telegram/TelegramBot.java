@@ -50,6 +50,11 @@ public class TelegramBot extends TelegramLongPollingBot {
                     case "/start":
                         sendMessageOnlyText("Введите ваше Имя",update.getMessage().getChatId());
                         mapWaiter.get(update.getMessage().getChatId()).setHasFirstName(true);
+                    case "На смену":
+                        break;
+                    default:
+                        sendMessageOnlyText("Не понимаю о чем вы. Попробуйте на кнопочки потыкать",update.getMessage().getChatId());
+                        break;
                 }
             }
 

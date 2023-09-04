@@ -3,7 +3,8 @@ import com.vdurmont.emoji.EmojiParser;
 
 public enum Emoji {
     WHITE_CHECK_MARK(":white_check_mark:"),
-    PEN(":lower_left_crayon:");
+    PEN(":lower_left_crayon:"),
+    WAITER(":man_in_tuxedo:");
     private final String value;
 
     public String get() {
