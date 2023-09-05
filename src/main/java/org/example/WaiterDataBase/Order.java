@@ -63,14 +63,10 @@ public class Order extends DataBase {
     }
 
     public void checkNewOrdersId(){ // Выкидывает из MAP заказов те, которые уже выводились
-        for (Map.Entry<Long, Order> dish: DbLibrary.orders.entrySet()){
-            Order order1 = dish.getValue();
-            Stream<Long> stream = DbLibrary.oldOrdersID.stream();
-
-            stream.filter(x -> x == order1.orderId).forEach(x -> DbLibrary.orders.remove(x));
-        }
+        DbLibrary.orders.entrySet()
+                .removeIf(entry -> DbLibrary.oldOrdersID.contains(entry.getKey()));
     }
-    public static void ordersOutPut(){ // выводит заказы
+    private static void ordersOutPut(){ // выводит заказы
 
         // лямбды нужные для вывода через консоль
         Consumer<Integer> dishOutput1 = System.out::println;
@@ -117,6 +113,22 @@ public class Order extends DataBase {
         // чищу MAP чтоб потом записать в него новые заказы из бд
         DbLibrary.orders.clear();
         DbLibrary.orders = new HashMap<>();
+    }
+    public static void continuousOutPut(){
+        Thread run = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true){
+                    try {
+                        Order.ordersOutPut();
+                        Thread.sleep(1000); //1000 - 1 сек
+                    } catch (InterruptedException ex) {
+                    }
+                }
+            }
+        });
+
+        run.start();
     }
     public boolean checkNewOrdersForNull(ResultSet newOrders){
         return newOrders == null;

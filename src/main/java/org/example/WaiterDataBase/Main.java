@@ -8,21 +8,8 @@ public class Main {
         DbLibrary.setDishesName(DbLibrary.getListCategoriesNameFromDb());
 
         // метод который постоянно вызывает метод вывода заказов
-        Thread run = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(true){
-                    try {
-                        Order.ordersOutPut();
-                        Thread.sleep(1000); //1000 - 1 сек
-                    } catch (InterruptedException ex) {
-                    }
-                }
-            }
-        });
 
-        run.start(); // заводим
+        Order.continuousOutPut();
     }
 }
 
-//DELETE FROM orderclients WHERE orderid = '2343';
