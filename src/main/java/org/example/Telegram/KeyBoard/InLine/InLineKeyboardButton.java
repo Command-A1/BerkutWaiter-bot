@@ -12,8 +12,6 @@ public abstract class InLineKeyboardButton {
     protected InlineKeyboardMarkup markupInLine;
     protected List<List<InlineKeyboardButton>> rowsInLine;
     protected List<InlineKeyboardButton> rowInLine;
-
-
     public void initializationInlineKeyboard() {
         markupInLine = new InlineKeyboardMarkup();
         rowsInLine = new ArrayList<>();

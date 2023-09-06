@@ -1,25 +1,36 @@
 package org.example.Telegram;
 
+import org.example.DataBase.WaiterDB.WaiterStatusManagement;
 import org.example.Telegram.KeyBoard.InLine.InLineKeyBoardCheckData;
+import org.example.Telegram.KeyBoard.Reply.ReplyKeyBoardOnShift;
 import org.example.Telegram.KeyBoard.Reply.ReplyKeyboardRegestration;
 import org.example.Telegram.Models.Waiter;
 
-import org.example.WaiterDataBase.Registration;
+import org.example.DataBase.OrderDB.DbLibrary;
+import org.example.DataBase.OrderDB.CheckOrder;
+import org.example.DataBase.WaiterDB.Registration;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+
+import java.sql.SQLException;
 import java.util.HashMap;
 
 public class TelegramBot extends TelegramLongPollingBot {
+    public TelegramBot() {
+        DbLibrary.setDishesName();
+        CheckOrder.continuousOutPut();
+    }
+
+    private ReplyKeyBoardOnShift replyKeyBoardOnShift = new ReplyKeyBoardOnShift();
     private HashMap<Long, Waiter> mapWaiter = new HashMap<>();
     private ReplyKeyboardRegestration replyKeyboardRegestration;
     private InLineKeyBoardCheckData inLineKeyBoardCheckData;
     private Registration registration = new Registration();
     private Update update;
-    private long chatId=0;
 
     @Override
     public String getBotUsername() {
@@ -39,21 +50,15 @@ public class TelegramBot extends TelegramLongPollingBot {
                 mapWaiter.put(update.getMessage().getChatId(), new Waiter(String.valueOf(update.getMessage().getChatId())));
 
 
-            if (mapWaiter.get(update.getMessage().getChatId()).isHasFirstName()) {
-                mapWaiter.get(update.getMessage().getChatId()).setFirstName(update.getMessage().getText());
-                sendMessageOnlyText("Введите вашу Фамилию", update.getMessage().getChatId());
-            } else if (mapWaiter.get(update.getMessage().getChatId()).isHasSecondName()) {
-                mapWaiter.get(update.getMessage().getChatId()).setSecondName(update.getMessage().getText());
-                outputEnterDataWaiter();
-            }else if(update.getMessage().hasText()){
-                switch (update.getMessage().getText()){
+            if (update.getMessage().hasText()) {
+                switch (update.getMessage().getText()) {
                     case "/start":
-                        sendMessageOnlyText("Введите ваше Имя",update.getMessage().getChatId());
-                        mapWaiter.get(update.getMessage().getChatId()).setHasFirstName(true);
+                        startWaiter();
                     case "На смену":
+                        onShiftReplyButton();
                         break;
                     default:
-                        sendMessageOnlyText("Не понимаю о чем вы. Попробуйте на кнопочки потыкать",update.getMessage().getChatId());
+                        sendMessageOnlyText("Не понимаю о чем вы. Попробуйте на кнопочки потыкать", update.getMessage().getChatId());
                         break;
                 }
             }
@@ -62,22 +67,30 @@ public class TelegramBot extends TelegramLongPollingBot {
             if (update.getCallbackQuery().getData().equals("отправить")) {
                 registration.recordInDBWaiter(mapWaiter.get(update.getCallbackQuery().getMessage().getChatId()));
                 deleteMessage();
-                sendMessageOnlyText("Отправлено",update.getCallbackQuery().getMessage().getChatId());
+                sendMessageOnlyText("Отправлено", update.getCallbackQuery().getMessage().getChatId());
             }
         }
 
     }
 
-    private void outputEnterDataWaiter() {
-        inLineKeyBoardCheckData = new InLineKeyBoardCheckData();
-        mapWaiter.get(update.getMessage().getChatId()).setReplyMarkupSendMessage(inLineKeyBoardCheckData.returnButtonCheckData());
-        mapWaiter.get(update.getMessage().getChatId()).setTextCheck();
-        executeMessage(mapWaiter.get(update.getMessage().getChatId()).getSendMessage());
+    private void startWaiter() {
+        try {
+            sendMessageOnlyText("Привет, " + WaiterStatusManagement.getNameWaiter(String.valueOf(update.getMessage().getChatId())), update.getMessage().getChatId());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        executeMessage(replyKeyBoardOnShift.buttonOnShift(mapWaiter.get(update.getMessage().getChatId())));
     }
 
-//    private void initializeMenuRegestration() {
-//        replyKeyboardRegestration = ReplyKeyboardRegestration.getReplyKeyboardRegestration();
-//        executeMessage(replyKeyboardRegestration.buttonRegestration(mapWaiter.get(update.getMessage().getChatId())));
+    private void onShiftReplyButton() {
+        WaiterStatusManagement.changeStateShiftToOn(String.valueOf(update.getMessage().getChatId()));
+    }
+
+//    private void outputEnterDataWaiter() {
+//        inLineKeyBoardCheckData = new InLineKeyBoardCheckData();
+//        mapWaiter.get(update.getMessage().getChatId()).setReplyMarkupSendMessage(inLineKeyBoardCheckData.returnButtonCheckData());
+//        mapWaiter.get(update.getMessage().getChatId()).setTextCheck();
+//        executeMessage(mapWaiter.get(update.getMessage().getChatId()).getSendMessage());
 //    }
 
     private void sendMessageOnlyText(String text, long chatId) {
@@ -86,6 +99,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         e.setChatId(chatId);
         executeMessage(e);
     }
+
     private void deleteMessage() {
         DeleteMessage deleteMessage = new DeleteMessage();
         deleteMessage.setChatId(update.getCallbackQuery().getMessage().getChatId());
@@ -96,6 +110,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             throw new RuntimeException(e);
         }
     }
+
     private void executeMessage(SendMessage message) {
         try {
             execute(message);
