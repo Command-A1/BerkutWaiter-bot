@@ -2,6 +2,8 @@ package org.example.DataBase.OrderDB;
 
 
 import org.example.DataBase.DataBase;
+import org.example.DataBase.WaiterDB.WaiterStatusManagement;
+import org.example.Telegram.OutputOrder.MessageOrderSend;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -39,21 +41,15 @@ public class CheckOrder extends DataBase {
                 .removeIf(entry -> DbLibrary.oldOrdersID.contains(entry.getKey()));
     }
 
-    private static void ordersOutPut() { // выводит заказы
+    private static void ordersOutPut(){ // выводит заказы
 
-        // лямбды нужные для вывода через консоль
-        Consumer<Integer> dishOutput1 = System.out::println;
-        Consumer<Long> dishOutput2 = System.out::println;
-        Consumer<String> dishOutput3 = System.out::println;
-        Consumer<ArrayList<String>> nameDishOutPut = x -> {
-            for (String name : x) System.out.println(name);
-        };
 
         CheckOrder checkOrder = new CheckOrder();
 
         // cтарт цикла метода
         // беру новые заказы и помещаю их в MAP
         try {
+            WaiterStatusManagement.recordWaiterOnShift();
             ResultSet newOrders = checkOrder.takeNewOrders();
             if (checkOrder.checkNewOrdersForNull(newOrders))
                 return; // если из бд нет заказов то завершаем итерацию метода
@@ -68,14 +64,7 @@ public class CheckOrder extends DataBase {
         if (DbLibrary.checkOrdersForEmptiness()) return; // проверка наслучий если список MAP стал пустым
 
         // вывод заказов в консоль
-        for (Map.Entry<Long, Order> dish : DbLibrary.orders.entrySet()) {
-            Order checkOrder1 = dish.getValue();
-            dishOutput2.accept(checkOrder1.getOrderId());
-            dishOutput3.accept(checkOrder1.getClientId());
-            dishOutput1.accept(checkOrder1.getTableClient());
-            nameDishOutPut.accept(checkOrder1.getDishes());
-            System.out.println();
-        }
+        MessageOrderSend.sendMessageOrder();
 
         // записываю ID выведенных заказов
         for (Map.Entry<Long, Order> dish : DbLibrary.orders.entrySet())

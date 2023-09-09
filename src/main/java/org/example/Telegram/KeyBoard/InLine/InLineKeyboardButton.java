@@ -10,11 +10,11 @@ import java.util.Map;
 public abstract class InLineKeyboardButton {
     protected ArrayList<Map<Integer, String>> hashMapArrayList;
     protected InlineKeyboardMarkup markupInLine;
-    protected List<List<InlineKeyboardButton>> rowsInLine;
-    protected List<InlineKeyboardButton> rowInLine;
+    protected List<List<InlineKeyboardButton>> rowsVerticalInLine;
+    protected List<InlineKeyboardButton> rowHorizontalInLine;
     public void initializationInlineKeyboard() {
         markupInLine = new InlineKeyboardMarkup();
-        rowsInLine = new ArrayList<>();
-        rowInLine = new ArrayList<>();
+        rowsVerticalInLine = new ArrayList<>();
+        rowHorizontalInLine = new ArrayList<>();
     }
 }

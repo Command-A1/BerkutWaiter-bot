@@ -1,14 +1,12 @@
 package org.example.Telegram;
 
 import org.example.DataBase.WaiterDB.WaiterStatusManagement;
-import org.example.Telegram.KeyBoard.InLine.InLineKeyBoardCheckData;
 import org.example.Telegram.KeyBoard.Reply.ReplyKeyBoardOnShift;
-import org.example.Telegram.KeyBoard.Reply.ReplyKeyboardRegestration;
 import org.example.Telegram.Models.Waiter;
 
 import org.example.DataBase.OrderDB.DbLibrary;
 import org.example.DataBase.OrderDB.CheckOrder;
-import org.example.DataBase.WaiterDB.Registration;
+import org.example.DataBase.WaiterDB.RegistrationWaiter;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -27,9 +25,9 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private ReplyKeyBoardOnShift replyKeyBoardOnShift = new ReplyKeyBoardOnShift();
     private HashMap<Long, Waiter> mapWaiter = new HashMap<>();
-    private ReplyKeyboardRegestration replyKeyboardRegestration;
-    private InLineKeyBoardCheckData inLineKeyBoardCheckData;
-    private Registration registration = new Registration();
+//    private ReplyKeyboardRegestration replyKeyboardRegestration;
+//    private InLineKeyBoardCheckData inLineKeyBoardCheckData;
+    private RegistrationWaiter registrationWaiter = new RegistrationWaiter();
     private Update update;
 
     @Override
@@ -54,7 +52,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 switch (update.getMessage().getText()) {
                     case "/start":
                         startWaiter();
-                    case "На смену":
+                    case "На смену \uD83E\uDD35":
                         onShiftReplyButton();
                         break;
                     default:
@@ -65,7 +63,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         } else if (update.hasCallbackQuery()) {
             if (update.getCallbackQuery().getData().equals("отправить")) {
-                registration.recordInDBWaiter(mapWaiter.get(update.getCallbackQuery().getMessage().getChatId()));
+                registrationWaiter.recordInDBWaiter(mapWaiter.get(update.getCallbackQuery().getMessage().getChatId()));
                 deleteMessage();
                 sendMessageOnlyText("Отправлено", update.getCallbackQuery().getMessage().getChatId());
             }
@@ -110,12 +108,12 @@ public class TelegramBot extends TelegramLongPollingBot {
             throw new RuntimeException(e);
         }
     }
-
-    private void executeMessage(SendMessage message) {
+    public void executeMessage(SendMessage message) {
         try {
             execute(message);
         } catch (TelegramApiException e) {
             System.out.println("Ошибка " + e.getMessage());
         }
     }
+
 }
