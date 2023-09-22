@@ -1,8 +1,15 @@
 package org.example.Telegram.Models;
 
+import lombok.SneakyThrows;
+import org.example.DataBase.OrderDB.Order;
+import org.example.DataBase.OrderDB.EditStatusOrderInDB;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class Waiter {
     public String getIdWaiter() {
@@ -83,11 +90,34 @@ public class Waiter {
     public void setHasSecondName(boolean hasSecondName) {
         this.hasSecondName = hasSecondName;
     }
-    public void setTextCheck(){
-        sendMessage.setText("Проверим ваши данные\n\nИмя: "+ firstName+"\n\nФамилия: "+ secondName);
+
+    public void setTextCheck() {
+        sendMessage.setText("Проверим ваши данные\n\nИмя: " + firstName + "\n\nФамилия: " + secondName);
     }
 
+    public ArrayList<Order> getOrdersWaiterAccepted() {
+        return ordersWaiterAccepted;
+    }
+    public void removeOrderInListOrderWaiterAccepted(String orderId){
+        for(Order order:ordersWaiterAccepted){
+            if(order.getOrderId()==Long.parseLong(orderId))ordersWaiterAccepted.remove(order);
+        }
+    }
 
+    @SneakyThrows
+    public void setOrdersWaiterAccepted(String idOrder) {
+        ordersWaiterAccepted.add(EditStatusOrderInDB.getRequiredOrder(idOrder));
+    }
+
+    public void clearListOrdersAccepted() {
+        Iterator<Order> iter = ordersWaiterAccepted.listIterator();
+        while (iter.hasNext()) {
+            iter.next();
+            iter.remove();
+        }
+    }
+
+    private ArrayList<Order> ordersWaiterAccepted = new ArrayList<>();
     private boolean hasFirstName = false;
     private boolean hasSecondName = false;
     private SendMessage sendMessage;

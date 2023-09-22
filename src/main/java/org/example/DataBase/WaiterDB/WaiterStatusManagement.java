@@ -1,5 +1,7 @@
 package org.example.DataBase.WaiterDB;
 
+
+import lombok.*;
 import org.example.DataBase.DataBase;
 
 import java.sql.ResultSet;
@@ -7,8 +9,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+
 public class WaiterStatusManagement extends DataBase {
-    private static ArrayList<String> mapStatusWaiter=new ArrayList<>();
+
+    @Getter
+    private static ArrayList<String> mapWaiterOnShift =new ArrayList<>();
     private static void changeStateShift(String state, String waiterId) { //Общий метод для смены состояния смены офицанта
         try {
             Statement stmt = databaseConn.createStatement();
@@ -18,11 +23,16 @@ public class WaiterStatusManagement extends DataBase {
         }
     }
 
-    public static String getNameWaiter(String waiterId) throws SQLException {
+    public static String getFullNameWaiter(String waiterId) throws SQLException {
         Statement stmt = databaseConn.createStatement();
         ResultSet e = stmt.executeQuery("select firstname,secondname from waiterlist where idwaiter = '" + waiterId + "'");
         e.next();
         return e.getString("firstname") + e.getString("secondname");
+    }public static String getFirstNameWaiter(String waiterId) throws SQLException {
+        Statement stmt = databaseConn.createStatement();
+        ResultSet e = stmt.executeQuery("select firstname from waiterlist where idwaiter = '" + waiterId + "'");
+        e.next();
+        return e.getString("firstname");
     }
 
     public static boolean checkWaiterStatusShift(String waiterId) throws SQLException {
@@ -35,11 +45,10 @@ public class WaiterStatusManagement extends DataBase {
         Statement stmt = databaseConn.createStatement();
         ResultSet e = stmt.executeQuery("select idwaiter from waiterlist where onshift = 'true'");
         while (e.next()){
-            mapStatusWaiter.add(e.getString("idwaiter"));
+            if(!mapWaiterOnShift.contains(e.getString("idwaiter")))
+                mapWaiterOnShift.add(e.getString("idwaiter"));
         }
-
     }
-
     public static void changeStateShiftToOn(String waiterId) { //Меняет состояние офицанта на "вышел на смену"
         changeStateShift("true", waiterId);
     }

@@ -1,6 +1,7 @@
 package org.example.DataBase.OrderDB;
 
 import org.example.DataBase.DataBase;
+import org.example.DataBase.WaiterDB.WaiterStatusManagement;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,6 +37,7 @@ public class DbLibrary extends DataBase {
     public static void setDishesName() {
 
         try {
+            WaiterStatusManagement.recordWaiterOnShift();
             for (String categoriesName: listCategoriesNameFromDb) {
                 Statement stmt = databaseConn.createStatement();
                 ResultSet dishesNameFromOneTable = stmt.executeQuery("select id, name from " + categoriesName);

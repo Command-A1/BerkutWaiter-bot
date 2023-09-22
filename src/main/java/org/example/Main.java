@@ -7,7 +7,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 @Data
 public class Main {
-    private static TelegramBot e;
+    public static TelegramBot e;
     public static void main(String[] args) {
 
         try {

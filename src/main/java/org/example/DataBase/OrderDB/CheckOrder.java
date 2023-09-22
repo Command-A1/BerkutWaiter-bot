@@ -14,56 +14,53 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class CheckOrder extends DataBase {
+    static CheckOrder checkOrder = new CheckOrder();
+
     public ResultSet takeNewOrders() throws SQLException { // Берет новые заказы из бд
         Statement stmt = databaseConn.createStatement();
-        return stmt.executeQuery("select tableclient, disheid, idclient, orderid from orderclients where confirmorder = 'false'");
+        return stmt.executeQuery("select tableclient, disheid, idclient, orderid,dateconfirmorder from orderclients where confirmorder = 'false'");
     }
 
     public void addNewOrder(ResultSet newOrders) throws SQLException { // Добавляем новые заказы в MAP заказов из класса DbLibrary
         while (newOrders.next()) {
-            Order Order = new Order(newOrders.getString("orderid"),
+            DbLibrary.orders.put(Long.valueOf(newOrders.getString("orderid")), new Order(newOrders.getString("orderid"),
                     newOrders.getString("idclient"),
                     newOrders.getString("tableclient"),
-                    newOrders.getString("disheid"));
-            DbLibrary.orders.put(Order.getOrderId(), Order);
+                    newOrders.getString("disheid"),
+                    newOrders.getString("dateconfirmorder")));
         }
     }
 
-
-    public int checkIdForDuplicates(ArrayList<Integer> dishesId, int id) { // Выдеат количество блюд по одному ID
-        int result = 0;
-        for (int dishId : dishesId) if (dishId == id) result++;
-        return result;
-    }
 
     public void checkNewOrdersId() { // Выкидывает из MAP заказов те, которые уже выводились
         DbLibrary.orders.entrySet()
                 .removeIf(entry -> DbLibrary.oldOrdersID.contains(entry.getKey()));
     }
 
-    private static void ordersOutPut(){ // выводит заказы
-
-
-        CheckOrder checkOrder = new CheckOrder();
-
-        // cтарт цикла метода
-        // беру новые заказы и помещаю их в MAP
+    public static void getOrdersWithDB() {
         try {
             WaiterStatusManagement.recordWaiterOnShift();
             ResultSet newOrders = checkOrder.takeNewOrders();
-            if (checkOrder.checkNewOrdersForNull(newOrders))
-                return; // если из бд нет заказов то завершаем итерацию метода
-            else checkOrder.addNewOrder(newOrders);
+            if (!checkOrder.checkNewOrdersForNull(newOrders))
+                checkOrder.addNewOrder(newOrders);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    private static void ordersOutPut() { // выводит заказы
+
+
+        // cтарт цикла метода
+        // беру новые заказы и помещаю их в MAP
+
+        getOrdersWithDB();
 
         checkOrder.checkNewOrdersId(); // проверка c предыдущими заказами, нужна чтобы из бд остались только не выведенные заказы
 
         if (DbLibrary.checkOrdersForEmptiness()) return; // проверка наслучий если список MAP стал пустым
 
-        // вывод заказов в консоль
+        // вывод заказов в бота
         MessageOrderSend.sendMessageOrder();
 
         // записываю ID выведенных заказов
@@ -80,21 +77,18 @@ public class CheckOrder extends DataBase {
     }
 
     public static void continuousOutPut() {
-        Thread run = new Thread(new Runnable() {
-            @Override
-            public void run() {
+        Thread run = new Thread(() -> {
+            while (true) {
                 try {
                     CheckOrder.ordersOutPut();
                     Thread.sleep(1000); //1000 - 1 сек
-                } catch (InterruptedException ex) {
-                    System.out.println(ex);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });
 
-        run.start();
+        run.start(); // заводим
+
     }
-
-
 }
-

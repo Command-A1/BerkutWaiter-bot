@@ -4,7 +4,10 @@ import com.vdurmont.emoji.EmojiParser;
 public enum Emoji {
     WHITE_CHECK_MARK(":white_check_mark:"),
     PEN(":lower_left_crayon:"),
-    WAITER(":man_in_tuxedo:");
+    MEMO(":memo:"),
+    WAITER(":man_in_tuxedo:"),
+    SLEEPING(":sleeping:");
+
     private final String value;
 
     public String get() {
