@@ -1,6 +1,7 @@
 package org.example.Telegram.OutputOrder;
 
 
+import lombok.SneakyThrows;
 import org.example.DataBase.OrderDB.DbLibrary;
 import org.example.DataBase.OrderDB.Order;
 import org.example.DataBase.WaiterDB.WaiterStatusManagement;
@@ -12,14 +13,18 @@ import java.util.Map;
 
 public class MessageOrderSend {
     static InLineOutputOrder inLineOutputOrder = new InLineOutputOrder();
+    @SneakyThrows
     public static void sendMessageOrder() {
-        for (Map.Entry<Long, Order> dish : DbLibrary.orders.entrySet()) {
-            for (String id : WaiterStatusManagement.getMapWaiterOnShift()) {
-                SendMessage s = new SendMessage();
-                s.setText(dish.getValue().toString());
-                s.setChatId(id);
-                s.setReplyMarkup(inLineOutputOrder.sendMessageWithOrder());
-                Main.e.executeMessage(s);
+        WaiterStatusManagement.recordWaiterOnShift();
+        if(!WaiterStatusManagement.getMapWaiterOnShift().isEmpty()) {
+            for (Map.Entry<Long, Order> dish : DbLibrary.orders.entrySet()) {
+                for (String id : WaiterStatusManagement.getMapWaiterOnShift()) {
+                    SendMessage s = new SendMessage();
+                    s.setText(dish.getValue().toString());
+                    s.setChatId(id);
+                    s.setReplyMarkup(inLineOutputOrder.sendMessageWithOrder());
+                    Main.e.executeMessage(s);
+                }
             }
         }
     }

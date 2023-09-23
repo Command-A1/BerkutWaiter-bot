@@ -39,7 +39,7 @@ public class CheckOrder extends DataBase {
 
     public static void getOrdersWithDB() {
         try {
-            WaiterStatusManagement.recordWaiterOnShift();
+
             ResultSet newOrders = checkOrder.takeNewOrders();
             if (!checkOrder.checkNewOrdersForNull(newOrders))
                 checkOrder.addNewOrder(newOrders);

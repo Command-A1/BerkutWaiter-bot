@@ -37,7 +37,7 @@ public class DbLibrary extends DataBase {
     public static void setDishesName() {
 
         try {
-            WaiterStatusManagement.recordWaiterOnShift();
+
             for (String categoriesName: listCategoriesNameFromDb) {
                 Statement stmt = databaseConn.createStatement();
                 ResultSet dishesNameFromOneTable = stmt.executeQuery("select id, name from " + categoriesName);

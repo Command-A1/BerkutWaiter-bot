@@ -32,6 +32,7 @@ public class EditStatusOrderInDB extends DataBase {
             stmt.executeUpdate("update orderclients set confirmorder = '" + confirmOrder + "' where orderid = '" + orderId + "'");
             stmt.executeUpdate("update orderclients set waitername = '" + nameWaiter + "' where orderid = '" + orderId + "'");
             stmt.executeUpdate("update orderclients set completedorder = '" + completeOrder + "' where orderid = '" + orderId + "'");
+            stmt.executeUpdate("update orderclients set sendmessage = 'false' where orderid = '" + orderId + "'");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
